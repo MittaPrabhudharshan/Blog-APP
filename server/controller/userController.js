@@ -1,17 +1,52 @@
-const register = async (req, res) => {
-  try {
-    res.status(200).json({ message: "Register endpoint" })
-  } catch (error) {
-    res.status(500).json({ error: error.message })
-  }
+const bcrypt = require("bcryptjs")
+const User = require("../model/userModel.js")
+
+async function register(req, res) {
+const { name, email, password } = req.body;
+
+const existingUser = await User.findOne({ email });
+
+if (existingUser) {
+return res.status(400). json({ message: "User already registered." });
+}
+const hashedPassword = bcrypt.hashSync(password, 10);
+
+await User.create({
+name,
+email,
+password: hashedPassword
+
+});
+
+return res.status(201).json({ message: "Registered successfully" });
+
 }
 
 const login = async (req, res) => {
-  try {
-    res.status(200).json({ message: "Login endpoint" })
-  } catch (error) {
-    res.status(500).json({ error: error.message })
+  const { email, password } = req.body;
+
+  // 1. Find user by email
+  const userData = await User.findOne({ email });
+
+  if (!userData) {
+    return res.status(400).json({ message: "Email not found" });
   }
+
+  // 2. Compare password
+  const isPasswordCorrect = bcrypt.compareSync(password, userData.password);
+
+  if (!isPasswordCorrect) {
+    return res.status(400).json({ message: "Password is wrong" });
+  }
+
+  // 3. Successful login
+  return res.status(200).json({ message: "Login successful", user: { name: userData.name, email: userData.email } });
 }
 
+
 module.exports = { register, login }
+
+
+
+
+

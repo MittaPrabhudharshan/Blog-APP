@@ -44,4 +44,5 @@ const getBlogbyuserId= async (req, res) => {
     res.status(500).json({ error: error.message })
   }
 }
+
 module.exports = { getAllBlogs, getBlogById, createBlog, updateBlog, deleteBlog ,getBlogbyuserId}
